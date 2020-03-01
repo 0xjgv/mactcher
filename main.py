@@ -33,7 +33,7 @@ class MacGraph:
     def _update_connections(self, stdout):
         connected, disconnected, new = 0, 0, 0
         previous_macs = {*self.graph.keys()}
-        now = datetime.now().strftime("%H:%M:%S")
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         print("New connected MACs:")
         for line in stdout.splitlines():
@@ -43,9 +43,13 @@ class MacGraph:
             mac = mac.strip().upper()
 
             if "(" not in mac or ")" not in mac:
-                self.graph.setdefault(mac, {}).update(
-                    last_seen=now, ip=ip, connected=True
-                )
+                state = self.graph.get(mac, {})
+                if state:
+                    is_connected = state.get('connected')
+                    if is_connected == False:
+                        print("> Reconnected:", mac)
+                self.graph[mac] = {"last_seen": now, "ip": ip, "connected": True}
+
                 if mac in previous_macs:
                     previous_macs.remove(mac)
                     connected += 1
@@ -54,19 +58,20 @@ class MacGraph:
                     new += 1
         print()
 
-        print("Disconnected MACs:")
-        for previous in previous_macs:
-            self.graph[previous].update(connected=False)
-            print(">", previous, f"last_seen: {self.graph[previous].get('last_seen')}")
+        print("Recently disconnected MACs:")
+        for previous_mac in previous_macs:
+            prev_state = self.graph.get(previous_mac)
+            if prev_state.get('connected') == True:
+                print(">", previous_mac)
+            self.graph[previous_mac].update(connected=False)
             disconnected += 1
         print()
 
         return connected, disconnected, new
 
     def _arp(self):
-        print("> (Address Resolution Protocol) started...")
         kwargs = {'stdout': PIPE, 'stderr': PIPE, 'universal_newlines': True}
-        with Popen(['arp', '-a'], **kwargs) as proc:
+        with Popen(['sudo', 'arp', '-a'], **kwargs) as proc:
             return proc.communicate()
 
     def _print(self):
@@ -75,8 +80,9 @@ class MacGraph:
 
     def start(self):
         while True:
+            print("> Loading Address Resolution Protocol...")
             self._run()
-            sleep(10)
+            sleep(1)
 
     def _run(self):
         stdout, stderr = self._arp()
