@@ -72,7 +72,7 @@ class MacGraph:
                 is_connected = state.get('connected')
                 if is_connected == False:
                     print("> Reconnected:", mac)
-            self.graph[mac] = {"last_seen": now, "connected": True, "system": system}
+            self.graph[mac] = {**state, "last_seen": now, "connected": True, "system": system}
 
             if mac in previous_macs:
                 previous_macs.remove(mac)
@@ -99,10 +99,6 @@ class MacGraph:
         kwargs = {'stdout': PIPE, 'stderr': PIPE, 'universal_newlines': True}
         with Popen(['sudo', 'nmap', '-sn', self.inet], **kwargs) as proc:
             return proc.communicate()
-
-    def _print(self):
-        for mac, more in self.graph.items():
-            print(f"MAC: {mac} - IPs: {more['ip']} - Last seen: {more['last_seen']}")
 
     def start(self):
         while True:
