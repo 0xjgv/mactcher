@@ -4,7 +4,7 @@ from datetime import datetime
 from os import system, name
 from atexit import register
 from time import sleep
-from src import ip
+from mactcher import ip
 from re import sub
 
 IPS_DIR = "ips"
@@ -28,8 +28,8 @@ IPS_DIR = "ips"
 
 class MacGraph:
     def __init__(self):
-        self.info = ip.get_ip_info()
-        self.ip = self.info.get("ip")
+        self.info =ip.get_ip_info()
+        self.ip = self.info.get("ip") or "10.0.0.11"
         self.inet = ip.get_inet()
 
         self.graph_path = f"./{IPS_DIR}/{self.ip}.json"
