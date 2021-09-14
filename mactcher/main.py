@@ -120,10 +120,6 @@ class MacGraph:
             print("New count:", new)
 
 
-if __name__ == "__main__":
+def start():
     mac = MacGraph()
     mac.start()
-
-    # use to test
-    # with open("./stdout.txt", "r") as stdout:
-    #     output = parse_line_output(stdout.readlines())
