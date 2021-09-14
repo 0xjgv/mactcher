@@ -25,13 +25,13 @@ def get_ip_info(retry_times=0):
     else:
         print("Retrying...")
         sleep(3)
-    req = Request(url="https://ifconfig.co/json", headers={'User-Agent': 'curl/7.54.0'})
+    req = Request(url="https://ifconfig.co/json", headers={"User-Agent": "curl/7.54.0"})
     try:
         res = urlopen(req).read()
         return loads(res.decode())
-    except Exception as exc:
+    except Exception:
         if retry_times < 5:
-            return get_ip_info(retry_times=retry_times+1)
+            return get_ip_info(retry_times=retry_times + 1)
         return {}
 
 

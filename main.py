@@ -28,7 +28,7 @@ IPS_DIR = "ips"
 
 class MacGraph:
     def __init__(self):
-        self.info =ip.get_ip_info()
+        self.info = ip.get_ip_info()
         self.ip = self.info.get("ip") or "10.0.0.11"
         self.inet = ip.get_inet()
 
@@ -68,10 +68,8 @@ class MacGraph:
             mac = mac.strip()
 
             state = self.graph.get(mac, {})
-            if state:
-                is_connected = state.get('connected')
-                if is_connected == False:
-                    print("> Reconnected:", mac)
+            if not state.get("connected"):
+                print("> Reconnected:", mac)
             self.graph[mac] = {**state, "last_seen": now, "connected": True, "system": system}
 
             if mac in previous_macs:
@@ -86,8 +84,8 @@ class MacGraph:
         for previous_mac in previous_macs:
             if previous_mac == "info":
                 continue
-            prev_state = self.graph.get(previous_mac)
-            if prev_state.get('connected') == True:
+            prev_state = self.graph.get(previous_mac, {})
+            if prev_state.get("connected"):
                 print(">", previous_mac)
             self.graph[previous_mac].update(connected=False)
             disconnected += 1
@@ -96,8 +94,8 @@ class MacGraph:
         return connected, disconnected, new
 
     def _nmap(self):
-        kwargs = {'stdout': PIPE, 'stderr': PIPE, 'universal_newlines': True}
-        with Popen(['sudo', 'nmap', '-sn', self.inet], **kwargs) as proc:
+        kwargs = {"stdout": PIPE, "stderr": PIPE, "universal_newlines": True}
+        with Popen(["sudo", "nmap", "-sn", self.inet], **kwargs) as proc:
             return proc.communicate()
 
     def start(self):
@@ -109,9 +107,9 @@ class MacGraph:
     def _run(self):
         stdout, stderr = self._nmap()
         if name == "posix":
-            system('clear')
+            system("clear")
         else:
-            system('cls')
+            system("cls")
 
         if stderr:
             print("stderr", stderr)
